@@ -94,15 +94,33 @@ func calculateProviders(source *LongLat) ([]Providers, error) {
 	return providers, nil
 }
 
-func getDistance(x, y LongLat) float64 {
-	lat := math.Pow((x.Latitude - y.Latitude), 2)
-	long := math.Pow((x.Longitude - y.Longitude), 2)
-	return math.Sqrt(lat + long)
-}
-
 func getProviders() ([]Providers, error) {
 	var providers []Providers
-	r := strings.NewReader(`[  {    "Name": "Avon and Wiltshire Mental Health Partnership NHS Trust",    "Address": "Bath NHS House, Newbridge Hill, Bath ",    "Postal": "BA1 3QE",    "Categories": "Healthcare",    "Miles": 100,    "Type": "Operational"  },  {    "Name": "Royal United Hospitals Bath NHS Foundation Trust",    "Address": "Combe Park, Bath",    "Postal": "BA1 3NG",    "Categories": "Healthcare, counselling, psychotherapy",    "Miles": 10,    "Type": "Operational"  },  {    "Name": "Weldmar Hospice",    "Address": "Herringston Road, Dorchester",    "Postal": "DT1 2SL",    "Categories": "Bereavement, end of Life, counselling, psychotherapy, hospice",    "Miles": 34,    "Type": "Operational"  },  {    "Name": "Sturminster Newton Medical Centre",    "Address": "Old Market Hill, Sturminster Newton",    "Postal": "DT10 1QU",    "Categories": "Repite Care",    "Miles": 64,    "Type": "Operational"  },  {    "Name": "We the Curious",    "Address": "ne Millennium Square, Anchor Rd, Bristol ",    "Postal": "S1 5DB",    "Categories": "Special Days,Complimentary Services, Hairdressing",    "Miles": 37,    "Type": "Operational"  },  {    "Name": "Bristol Zoo",    "Address": "Bristol",    "Postal": "BS8 3HA",    "Categories": "Respite Care, Special Days",    "Miles": 800,    "Type": "Operational"  },  {    "Name": "Oakham Treasures",    "Address": "Oakham farm",    "Postal": "BS20 7SP",    "Categories": "Respite Care, Special Days",    "Miles": 244,    "Type": "Operational"  },  {    "Name": "Batch Golf Club",    "Address": "Sham Castle, Golf Course Rd, Bath ",    "Postal": "BA2 6JG",    "Categories": "Sport, Special Days, Recovery Support",    "Miles": 23,    "Type": "Operational"  },  {    "Name": "Headscarves By Ciara",    "Address": "7 Bridgelea cottages , Newtownards , North Down , United Kingdom",    "Postal": "BT23 7TQ",    "Categories": "Accessories, Support, Clothing, Complimentary therapy",    "Miles": 50,    "Type": "Operational"  },  {    "Name": "Duffus Cancer Foundation",    "Address": "Duffus street",    "Postal": "",    "Categories": "Support, Bereavement, Carer, Charity",    "Miles": null,    "Type": "On-line"  },  {    "Name": "Ebisu Health Limited",    "Address": "Support, Bereavement, Counselling, Healthcare",    "Postal": "",    "Categories": "",    "Miles": null,    "Type": ""  } ]`)
+	r := strings.NewReader(`[  {    "Name": "Avon and Wiltshire Mental Health Partnership NHS Trust",    "Address": "Bath NHS House, Newbridge Hill, Bath ",    "Postal": "BA1 3QE",    "Categories": "Healthcare",    "Miles": 100,    "Type": "Operational"  },  {    "Name": "Royal United Hospitals Bath NHS Foundation Trust",    "Address": "Combe Park, Bath",    "Postal": "BA1 3NG",    "Categories": "Healthcare, counselling, psychotherapy",    "Miles": 10,    "Type": "Operational"  },  {    "Name": "Weldmar Hospice",    "Address": "Herringston Road, Dorchester",    "Postal": "DT1 2SL",    "Categories": "Bereavement, end of Life, counselling, psychotherapy, hospice",    "Miles": 34,    "Type": "Operational"  },  {    "Name": "Sturminster Newton Medical Centre",    "Address": "Old Market Hill, Sturminster Newton",    "Postal": "DT10 1QU",    "Categories": "Repite Care",    "Miles": 64,    "Type": "Operational"  },  {    "Name": "We the Curious",    "Address": "ne Millennium Square, Anchor Rd, Bristol ",    "Postal": "BS1 5DB",    "Categories": "Special Days,Complimentary Services, Hairdressing",    "Miles": 37,    "Type": "Operational"  },  {    "Name": "Bristol Zoo",    "Address": "Bristol",    "Postal": "BS8 3HA",    "Categories": "Respite Care, Special Days",    "Miles": 800,    "Type": "Operational"  },  {    "Name": "Oakham Treasures",    "Address": "Oakham farm",    "Postal": "BS20 7SP",    "Categories": "Respite Care, Special Days",    "Miles": 244,    "Type": "Operational"  },  {    "Name": "Batch Golf Club",    "Address": "Sham Castle, Golf Course Rd, Bath ",    "Postal": "BA2 6JG",    "Categories": "Sport, Special Days, Recovery Support",    "Miles": 23,    "Type": "Operational"  },  {    "Name": "Headscarves By Ciara",    "Address": "7 Bridgelea cottages , Newtownards , North Down , United Kingdom",    "Postal": "BT23 7TQ",    "Categories": "Accessories, Support, Clothing, Complimentary therapy",    "Miles": 50,    "Type": "Operational"  },  {    "Name": "Duffus Cancer Foundation",    "Address": "Duffus street",    "Postal": "",    "Categories": "Support, Bereavement, Carer, Charity",    "Miles": null,    "Type": "On-line"  },  {    "Name": "Ebisu Health Limited",    "Address": "Support, Bereavement, Counselling, Healthcare",    "Postal": "",    "Categories": "",    "Miles": null,    "Type": ""  } ]`)
 	err := json.NewDecoder(r).Decode(&providers)
 	return providers, err
+}
+
+func getDistance(x, y LongLat) float64 {
+
+	radLat1 := math.Pi * x.Latitude / 180
+	radLat2 := math.Pi * y.Latitude / 180
+
+	theta := x.Longitude - y.Longitude
+	radTheta := math.Pi * theta / 180
+
+	dist := math.Sin(radLat1)*math.Sin(radLat2) + math.Cos(radLat1)*math.Cos(radLat2)*math.Cos(radTheta)
+
+	if dist > 1 {
+		dist = 1
+	}
+
+	dist = math.Acos(dist)
+	dist = dist * 180 / math.Pi
+	dist = dist * 60 * 1.1515
+
+	// lat := math.Pow((x.Latitude - y.Latitude), 2)
+	// long := math.Pow((x.Longitude - y.Longitude), 2)
+	// return math.Sqrt(lat + long)
+	return dist
 }
