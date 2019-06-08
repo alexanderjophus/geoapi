@@ -46,6 +46,8 @@ func Run() {
 		if err != nil {
 			w.Write([]byte(err.Error()))
 		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
 		w.Write(ret)
 	})
 
